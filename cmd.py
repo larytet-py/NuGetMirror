@@ -77,7 +77,9 @@ def main(command, index_url='https://api.nuget.org/v3/index.json', max_threads=1
             results.update(result)
 
     results_json = json.dumps(results, sort_keys=True, indent=2)
-    print(f"{results_json}")
+    if command == "list":
+        print(f"{results_json}")
+        return
 
 if __name__ == '__main__':
     main()

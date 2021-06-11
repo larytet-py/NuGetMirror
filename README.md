@@ -5,3 +5,9 @@ Pipeline processing of Nugets found on the https://www.nuget.org/ The starting p
 Reference code is https://github.com/emgarten/NuGet.CatalogReader
 
 
+
+Usage
+
+```
+python3 cmd.py list
+```
