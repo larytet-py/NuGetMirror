@@ -9,6 +9,11 @@ ID_KEY = "@id"
 
 logger = logging.getLogger()
 def process_resource(resource):
+    resource_type = resource.get("@type", "")
+    if resource_type.startswith("SearchAutocompleteService"):
+        logger.info(f"Skip autocomplete {resource}")
+        return None
+
     id = resource.get(ID_KEY, None)
     if id is None:
         logger.error(f"{resource} is missing ID")
