@@ -8,6 +8,7 @@ default_index_url = "https://api.nuget.org/v3/index.json"
 
 
 def process_resource(resource):
+    return resource.get("@id", None)
 
 @easyargs
 def main(index_url=default_index_url, threads=16) -> int:
@@ -25,7 +26,14 @@ def main(index_url=default_index_url, threads=16) -> int:
         futures = {executor.submit(process_resource, resource): resource for resource in resources}
         executor.wait()
 
-        results = {future.result() for future in futures}
+        results = {}
+        for future in futures:
+            result = future.result()
+            if result is None:
+                logger.error(f"{resource} is missing ID")
+                continue
+
+            results.add(result)
 
     print(f"{results}")
 
