@@ -79,6 +79,8 @@ def process_catalogue(catalogue):
 
     return all_packages
 
+def process_resource_package(resource):
+
 def process_resource(resource):
     resource_type = resource.get(TYPE_KEY, "")
     if resource_type.startswith("SearchAutocompleteService"):
@@ -86,6 +88,7 @@ def process_resource(resource):
         return None
 
     if resource_type.startswith("Catalog"):
+        logger.info(f"{resource} is a catalogue")
         return process_catalogue(resource)
 
     id = resource.get(ID_KEY, None)
