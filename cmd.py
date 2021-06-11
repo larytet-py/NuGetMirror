@@ -28,7 +28,10 @@ def process_resource(resource):
     data = index["data"]
     packages = {}
     for d in data:
-        print(d)
+        if type(d) is not dict:
+            logger.error(f"{d} in {resource}/{index}/{data} is not a dictionary")
+            continue
+
         package_id = d.get(ID_KEY, None)
         if package_id is None:
             logger.error(f"{resource}/{index}/{data} is missing ID")
