@@ -130,7 +130,7 @@ def process_resource(resource):
     return packages
 
 @easyargs
-def main(command, index_url='https://api.nuget.org/v3/index.json', max_threads=16):
+def main(command, index_url='https://api.nuget.org/v3/index.json', max_threads=64):
     commands = ["hash", "list"]
     if command not in commands:
         logger.error(f"{command} is not from {commands}")
