@@ -3,7 +3,7 @@ import easyargs
 import json
 import requests
 import logging
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait
 
 logger = logging.getLogger()
 
@@ -29,9 +29,9 @@ def main(command, index_url='https://api.nuget.org/v3/index.json', threads=16):
             process_resource(resource)
 
         futures = {executor.submit(process_resource, resource): resource for resource in resources}
-        executor.wait()
+        wait(futures)
 
-        results = {}
+        results = set()
         for future in futures:
             result = future.result()
             if result is None:
