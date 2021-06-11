@@ -62,6 +62,7 @@ def process_catalogue_page(catalogue_page):
 def process_catalogue(catalogue):
     items = catalogue.get("items", None)
     if items is None:
+        logger.error(f"{catalogue} is missnig 'items'")
         return None
 
     all_packages = {}
