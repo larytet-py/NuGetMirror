@@ -12,7 +12,7 @@ logger = logging.getLogger()
 
 def get_json(url):
     try:
-        r = requests.get(url)
+        r = requests.get(url, timeout=5)
     except Exception:
         logger.exception(f"Failed to fetch {url}")
         return None
@@ -41,10 +41,10 @@ def process_catalogue_page(catalogue_page):
 
     packages = {}
     for item in items:
-        catalogue_type = resource.get(TYPE_KEY, "")
+        catalogue_type = item.get(TYPE_KEY, "")
         if catalogue_type != "nuget:PackageDetails":
             continue
-        id = resource.get(ID_KEY, None)
+        id = item.get(ID_KEY, None)
         if id is None:
             logger.error(f"{catalogue} is missing ID")
             continue
@@ -76,7 +76,7 @@ def process_catalogue(catalogue):
 
     all_packages = {}
     for item in items:
-        catalogue_type = resource.get(TYPE_KEY, "")
+        catalogue_type = item.get(TYPE_KEY, "")
         if catalogue_type != "CatalogPage":
             logger.error(f"Skip {catalogue_type} in {catalogue}")
             continue
