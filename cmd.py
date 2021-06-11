@@ -10,7 +10,54 @@ TYPE_KEY = "@type"
 
 logger = logging.getLogger()
 
+def get_json(url):
+    try:
+        r = requests.get(url)
+    except Exception:
+        logger.exception(f"Failed to fetch {url}")
+        return None
+
+    if r.status_code != 200:
+        logger.error(f"Response {r.status_code} for {url}")
+        return None
+
+    try:
+        data = r.json()
+    except Exception:
+        logger.exception(f"Failed to unmarchal {url}")
+        return None
+
+    return data
+
 def process_catalogue_page(catalogue_page):
+    catalogue = get_json(catalogue_page)
+    if catalogue == None:
+        return None
+
+    items = catalogue.get("items", None)
+    if items is None:
+        logger.error(f"{catalogue} is missing items")
+        return None
+
+    packages = {}
+    for item in items:
+        catalogue_type = resource.get(TYPE_KEY, "")
+        if catalogue_type != "nuget:PackageDetails":
+            continue
+        id = resource.get(ID_KEY, None)
+        if id is None:
+            logger.error(f"{catalogue} is missing ID")
+            continue
+        item_data = get_json(id)
+        if item_data == None:
+            continue
+        package_id = item_data.get("id", None)
+        if package_id is None:
+            logger.error(f"{item_data} is missing ID")
+            continue
+        packages[package_id] = []
+
+    return packages
 
 def process_catalogue(catalogue):
     items = catalogue.get("items", None)
@@ -45,20 +92,8 @@ def process_resource(resource):
         logger.error(f"{resource} is missing ID")
         return None
 
-    try:
-        r = requests.get(id)
-    except Exception:
-        logger.exception(f"Failed to fetch {id}")
-        return None
-
-    if r.status_code != 200:
-        logger.error(f"Response {r.status_code} for {id}")
-        return None
-
-    try:
-        index = r.json()
-    except Exception:
-        logger.exception(f"Failed to unmarchal {id}")
+    index = get_json(id)
+    if index == None:
         return None
 
     if "data" not in index:
