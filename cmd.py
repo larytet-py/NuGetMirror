@@ -60,9 +60,18 @@ def process_catalogue_page(catalogue_page):
     return packages
 
 def process_catalogue(catalogue):
-    items = catalogue.get("items", None)
+    id = catalogue.get(ID_KEY, None)
+    if id is None:
+        logger.error(f"{catalogue} is missnig ID")
+        return None
+
+    catalogue_data = get_json(id)
+    if catalogue_data is None:
+        return None
+
+    items = catalogue_data.get("items", None)
     if items is None:
-        logger.error(f"{catalogue} is missnig 'items'")
+        logger.error(f"{catalogue}/{catalogue_data} is missnig 'items'")
         return None
 
     all_packages = {}
@@ -71,7 +80,7 @@ def process_catalogue(catalogue):
         if catalogue_type != "CatalogPage":
             logger.error(f"Skip {catalogue_type} in {catalogue}")
             continue
-        id = resource.get(ID_KEY, None)
+        id = item.get(ID_KEY, None)
         if id is None:
             logger.error(f"{catalogue} is missing ID")
             continue
