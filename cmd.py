@@ -28,6 +28,7 @@ def process_resource(resource):
     data = index["data"]
     packages = {}
     for d in data:
+        print(d)
         package_id = d.get(ID_KEY, None)
         if package_id is None:
             logger.error(f"{resource}/{index}/{data} is missing ID")
