@@ -56,13 +56,13 @@ def main(command, index_url='https://api.nuget.org/v3/index.json', max_threads=1
         futures = {executor.submit(process_resource, resource): resource for resource in resources}
         wait(futures)
 
-        results = set()
+        results = {}
         for future in futures:
             result = future.result()
             if result is None:
                 continue
 
-            results.add(result)
+            results = results | result
 
     print(f"{results}")
 
