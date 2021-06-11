@@ -38,7 +38,7 @@ def process_resource(resource):
             logger.error(f"{d} in {resource}/{index}/{data} is not a dictionary")
             continue
 
-        package_id = d.get(ID_KEY, None)
+        package_id = d.get("id", None)
         if package_id is None:
             logger.error(f"{resource}/{index}/{data} is missing ID")
             continue
@@ -61,6 +61,7 @@ def main(command, index_url='https://api.nuget.org/v3/index.json', max_threads=1
         return -2
 
     resources = index["resources"]
+    results = {}
     with ThreadPoolExecutor(max_workers = max_threads) as executor:
         for resource in resources:
             process_resource(resource)
@@ -68,7 +69,6 @@ def main(command, index_url='https://api.nuget.org/v3/index.json', max_threads=1
         futures = {executor.submit(process_resource, resource): resource for resource in resources}
         wait(futures)
 
-        results = {}
         for future in futures:
             result = future.result()
             if result is None:
