@@ -1,22 +1,27 @@
+import sys
 import easyargs
 import json
 import requests
-import logger
+import logging
 from concurrent.futures import ThreadPoolExecutor
 
-default_index_url = "https://api.nuget.org/v3/index.json"
-
+logger = logging.getLogger()
 
 def process_resource(resource):
     return resource.get("@id", None)
 
 @easyargs
-def main(index_url=default_index_url, threads=16) -> int:
+def main(command, index_url='https://api.nuget.org/v3/index.json', threads=16):
+    commands = ["hash", "list"]
+    if command not in commands:
+        logger.error(f"{command} is not from {commands}")
+        return -1
+
     r = requests.get(index_url)
     index = r.json()
-    if not "resources" in index:
+    if "resources" not in index:
         logger.error(f"No 'resources' in {index}")
-        return -1
+        return -2
 
     resources = index["resources"]
     with ThreadPoolExecutor(max_workers = 5) as executor:
@@ -37,6 +42,5 @@ def main(index_url=default_index_url, threads=16) -> int:
 
     print(f"{results}")
 
-
-if __name__ == "__main__":
-    sys.exit(main())
+if __name__ == '__main__':
+    main()
