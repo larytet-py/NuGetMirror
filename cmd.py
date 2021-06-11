@@ -9,11 +9,36 @@ ID_KEY = "@id"
 TYPE_KEY = "@type"
 
 logger = logging.getLogger()
+
+def process_catalogue_page(catalogue_page):
+
+def process_catalogue(catalogue):
+    items = catalogue.get("items", None)
+    if items is None:
+        return None
+
+    all_packages = {}
+    for item in items:
+        catalogue_type = resource.get(TYPE_KEY, "")
+        if catalogue_type != "CatalogPage":
+            continue
+        id = resource.get(ID_KEY, None)
+        if id is None:
+            logger.error(f"{catalogue} is missing ID")
+            continue
+        packages = process_catalogue_page(id)
+        all_packages.update(packages)
+
+    return all_packages
+
 def process_resource(resource):
     resource_type = resource.get(TYPE_KEY, "")
     if resource_type.startswith("SearchAutocompleteService"):
         logger.info(f"Skip autocomplete {resource}")
         return None
+
+    if resource_type.startswith("Catalog"):
+        return process_catalogue(resource})
 
     id = resource.get(ID_KEY, None)
     if id is None:
@@ -22,9 +47,18 @@ def process_resource(resource):
 
     try:
         r = requests.get(id)
-        index = r.json()
     except Exception:
         logger.exception(f"Failed to fetch {id}")
+        return None
+
+    if r.status_code != 200:
+        logger.error(f"Response {r.status_code} for {id}")
+        return None
+
+    try:
+        index = r.json()
+    except Exception:
+        logger.exception(f"Failed to unmarchal {id}")
         return None
 
     if "data" not in index:
@@ -45,6 +79,7 @@ def process_resource(resource):
         versions = [version.get(ID_KEY, None) for version in d.get("versions", [])]
         packages[package_id] = versions
 
+    logger.info(f"Collected {len(packages)} packages")
     return packages
 
 @easyargs
@@ -61,7 +96,7 @@ def main(command, index_url='https://api.nuget.org/v3/index.json', max_threads=1
         return -2
 
     resources = index["resources"]
-    results = {}
+    packages = {}
     with ThreadPoolExecutor(max_workers = max_threads) as executor:
         for resource in resources:
             process_resource(resource)
@@ -74,11 +109,13 @@ def main(command, index_url='https://api.nuget.org/v3/index.json', max_threads=1
             if result is None:
                 continue
 
-            results.update(result)
+            packages.update(result)
 
-    results_json = json.dumps(results, sort_keys=True, indent=2)
+
+    logger.info(f"Collected Total {len(packages)} packages")
+    packages_json = json.dumps(packages, sort_keys=True, indent=2)
     if command == "list":
-        print(f"{results_json}")
+        print(f"{packages}")
         return
 
 if __name__ == '__main__':
