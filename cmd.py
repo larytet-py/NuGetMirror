@@ -68,6 +68,7 @@ def process_catalogue(catalogue):
     for item in items:
         catalogue_type = resource.get(TYPE_KEY, "")
         if catalogue_type != "CatalogPage":
+            logger.error(f"Skip {catalogue_type} in {catalogue}")
             continue
         id = resource.get(ID_KEY, None)
         if id is None:
@@ -85,7 +86,7 @@ def process_resource(resource):
         return None
 
     if resource_type.startswith("Catalog"):
-        return process_catalogue(resource})
+        return process_catalogue(resource)
 
     id = resource.get(ID_KEY, None)
     if id is None:
