@@ -5,10 +5,11 @@ import requests
 import logging
 from concurrent.futures import ThreadPoolExecutor, wait
 
-logger = logging.getLogger()
+ID_KEY = "@id"
 
+logger = logging.getLogger()
 def process_resource(resource):
-    id = resource.get("@id", None)
+    id = resource.get(ID_KEY, None)
     if id is None:
         logger.error(f"{resource} is missing ID")
         return None
@@ -24,13 +25,14 @@ def process_resource(resource):
         logger.error(f"'data' is missing in {resource}/{index}")
         return None
 
+    data = index["data"]
     packages = {}
     for d in data:
-        package_id = data.get("id", None)
+        package_id = d.get(ID_KEY, None)
         if package_id is None:
             logger.error(f"{resource}/{index}/{data} is missing ID")
             continue
-        versions = {version.get("@id", None) for version in d.get("versions", [])}
+        versions = {version.get(ID_KEY, None) for version in d.get("versions", [])}
         packages[package_id] = versions
 
     return packages
