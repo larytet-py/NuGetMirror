@@ -73,7 +73,7 @@ def main(command, index_url='https://api.nuget.org/v3/index.json', max_threads=1
             if result is None:
                 continue
 
-            results = results | result
+            results.update(result)
 
     print(f"{results}")
 
