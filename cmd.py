@@ -6,10 +6,11 @@ import logging
 from concurrent.futures import ThreadPoolExecutor, wait
 
 ID_KEY = "@id"
+TYPE_KEY = "@type"
 
 logger = logging.getLogger()
 def process_resource(resource):
-    resource_type = resource.get("@type", "")
+    resource_type = resource.get(TYPE_KEY, "")
     if resource_type.startswith("SearchAutocompleteService"):
         logger.info(f"Skip autocomplete {resource}")
         return None
@@ -41,7 +42,7 @@ def process_resource(resource):
         if package_id is None:
             logger.error(f"{resource}/{index}/{data} is missing ID")
             continue
-        versions = {version.get(ID_KEY, None) for version in d.get("versions", [])}
+        versions = [version.get(ID_KEY, None) for version in d.get("versions", [])]
         packages[package_id] = versions
 
     return packages
